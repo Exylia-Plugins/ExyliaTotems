@@ -1,2 +1,2 @@
 prefix: "{primary}&lE-TOTEMS &8•&r"
-used: "%prefix% {error}We saved you because of your ping difference."
+used: "%prefix% {success}We saved you because of your ping difference."

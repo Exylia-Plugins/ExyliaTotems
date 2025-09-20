@@ -5,6 +5,7 @@ import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import lombok.Getter;
 import net.exylia.commons.utils.DebugUtils;
+import net.exylia.exyliaTotems.command.ReloadCommand;
 import net.exylia.exyliaTotems.configs.MainConfig;
 import net.exylia.exyliaTotems.configs.Messages;
 import net.exylia.exyliaTotems.listener.PacketEventsListener;
@@ -35,6 +36,8 @@ public final class ExyliaTotems extends ExyliaPlugin {
         PacketEvents.getAPI().init();
         this.deathManager = new DeathManager(this);
         new BukkitPlayerListener(this);
+
+        getCommand("exyliatotem-reload").setExecutor(new ReloadCommand(this));
     }
 
     @Override
