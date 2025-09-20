@@ -1,0 +1,10 @@
+name: ExyliaTotems
+version: '1.0.0'
+main: net.exylia.exyliaTotems.ExyliaTotems
+api-version: '1.20'
+authors: [ DiGround ]
+description: If you need help, join to my discord.
+website: https://link.exylia.net/@services
+depend: [packetevents]
+libraries:
+  - 'net.kyori:adventure-platform-bukkit:4.3.4'
