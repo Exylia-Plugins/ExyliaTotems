@@ -74,4 +74,6 @@ shadowJar {
     destinationDirectory = file(outputDirectory)
     minimize()
     relocate "${mainPackage}.commons", "${mainPackage}.libs.commons"
+    relocate "com.hapangama", "${mainPackage}.libs.sl"
+    relocate "com.github.lalyos.jfiglet", "${mainPackage}.libs.jfiglet"
 }

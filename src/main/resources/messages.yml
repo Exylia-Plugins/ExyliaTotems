@@ -1,2 +1,9 @@
 prefix: "{primary}&lE-TOTEMS &8•&r"
 used: "%prefix% {success}We saved you because of your ping difference."
+
+system:
+  commands:
+    reload:
+      starting: "%prefix% {info}ℹ Reloading..."
+      success: "%prefix% {success}✓ Plugin reloaded successfully in {info}%time%ms{success}."
+      error: "%prefix% {error}✘ Reload error: %error%"
