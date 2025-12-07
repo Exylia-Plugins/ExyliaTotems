@@ -8,6 +8,7 @@ website: https://link.exylia.net/@services
 depend: [packetevents]
 libraries:
   - 'net.kyori:adventure-platform-bukkit:4.3.4'
+  - 'com.github.ben-manes.caffeine:caffeine:3.2.2'
 
 commands:
   exyliatotem-reload:
