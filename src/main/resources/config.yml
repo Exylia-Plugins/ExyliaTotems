@@ -1,8 +1,0 @@
-debug: false # Only for development purposes
-
-text:
-  automatic-font: "small" # small or none
-  force-in-upper-case: true
-
-totems:
-  delay-ticks: 3

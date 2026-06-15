@@ -7,12 +7,13 @@ import com.github.retrooper.packetevents.protocol.player.DiggingAction;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientClickWindow;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientHeldItemChange;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerDigging;
+import net.exylia.commons.v2.debug.api.DebugAPI;
+import net.exylia.commons.v2.tasks.api.TaskAPI;
 import net.exylia.exyliaTotems.ExyliaTotems;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-import static net.exylia.commons.utils.DebugUtils.logDebug;
+import java.util.concurrent.TimeUnit;
 
 public class PacketEventsListener implements PacketListener {
     private final ExyliaTotems plugin;
@@ -27,7 +28,7 @@ public class PacketEventsListener implements PacketListener {
         if (e.getPacketType() == PacketType.Play.Client.HELD_ITEM_CHANGE) {
             WrapperPlayClientHeldItemChange packet = new WrapperPlayClientHeldItemChange(e);
             Player player = (Player) e.getPlayer();
-            logDebug("Player " + player.getName() + " changed hotbar slot to: " + packet.getSlot());
+            DebugAPI.logPluginDebug("Player " + player.getName() + " changed hotbar slot to: " + packet.getSlot());
             plugin.getDeathManager().playerSlotChanged(player, packet.getSlot());
             return;
         }
@@ -37,7 +38,7 @@ public class PacketEventsListener implements PacketListener {
             WrapperPlayClientPlayerDigging packet = new WrapperPlayClientPlayerDigging(e);
             if (packet.getAction() == DiggingAction.SWAP_ITEM_WITH_OFFHAND) {
                 Player player = (Player) e.getPlayer();
-                logDebug("Player " + player.getName() + " swapped item with offhand (F key)");
+                DebugAPI.logPluginDebug("Player " + player.getName() + " swapped item with offhand (F key)");
                 plugin.getDeathManager().playerOffhandSwitch(player);
             }
             return;
@@ -51,7 +52,7 @@ public class PacketEventsListener implements PacketListener {
             // Tecla F dentro del inventario (swap con offhand)
             if (packet.getWindowClickType() == WrapperPlayClientClickWindow.WindowClickType.SWAP
                     && packet.getButton() == 40) {
-                logDebug("Player " + player.getName() + " swapped item with offhand (F in inventory)");
+                DebugAPI.logPluginDebug("Player " + player.getName() + " swapped item with offhand (F in inventory)");
                 plugin.getDeathManager().playerOffhandSwitch(player);
                 return;
             }
@@ -60,7 +61,7 @@ public class PacketEventsListener implements PacketListener {
             if (packet.getWindowClickType() == WrapperPlayClientClickWindow.WindowClickType.SWAP
                     && packet.getButton() >= 0 && packet.getButton() <= 8) {
                 int targetSlot = packet.getButton();
-                logDebug("Player " + player.getName() + " used number key " + (targetSlot + 1) + " to swap item to hotbar slot " + targetSlot + " from inventory slot " + packet.getSlot());
+                DebugAPI.logPluginDebug("Player " + player.getName() + " used number key " + (targetSlot + 1) + " to swap item to hotbar slot " + targetSlot + " from inventory slot " + packet.getSlot());
                 plugin.getDeathManager().playerSlotChanged(player, targetSlot);
                 return;
             }
@@ -68,14 +69,14 @@ public class PacketEventsListener implements PacketListener {
             if (packet.getWindowClickType() == WrapperPlayClientClickWindow.WindowClickType.PICKUP
                     && packet.getButton() >= 0 && packet.getButton() <= 8) {
                 int targetSlot = packet.getButton();
-                logDebug("Player " + player.getName() + " used number key " + (targetSlot + 1) + " to move item to hotbar slot " + targetSlot);
+                DebugAPI.logPluginDebug("Player " + player.getName() + " used number key " + (targetSlot + 1) + " to move item to hotbar slot " + targetSlot);
                 plugin.getDeathManager().playerSlotChanged(player, targetSlot);
                 return;
             }
 
             // Click directo en slot 45 (offhand en inventario de jugador)
             if (packet.getSlot() == 45) {
-                logDebug("Player " + player.getName() + " clicked offhand slot directly");
+                DebugAPI.logPluginDebug("Player " + player.getName() + " clicked offhand slot directly");
                 plugin.getDeathManager().playerOffhandSwitch(player);
                 return;
             }
@@ -86,7 +87,7 @@ public class PacketEventsListener implements PacketListener {
                 if (packet.getSlot() >= 9) { // Solo si viene del inventario principal (no hotbar)
                     org.bukkit.inventory.ItemStack clickedItem = player.getInventory().getItem(packet.getSlot());
                     if (clickedItem != null && clickedItem.getType() == Material.TOTEM_OF_UNDYING) {
-                        logDebug("Player " + player.getName() + " shift+clicked totem from slot " + packet.getSlot());
+                        DebugAPI.logPluginDebug("Player " + player.getName() + " shift+clicked totem from slot " + packet.getSlot());
 
                         // Tomar snapshot de la hotbar actual ANTES del movimiento
                         boolean[] hotbarHadTotem = new boolean[9];
@@ -96,19 +97,19 @@ public class PacketEventsListener implements PacketListener {
                         }
 
                         // Verificar después del movimiento qué slot cambió
-                        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                        TaskAPI.atLater(player, () -> {
                             for (int i = 0; i < 9; i++) {
                                 org.bukkit.inventory.ItemStack item = player.getInventory().getItem(i);
                                 boolean hasTotemNow = (item != null && item.getType() == Material.TOTEM_OF_UNDYING);
 
                                 // Si antes no tenía totem y ahora sí = aquí se movió el totem
                                 if (!hotbarHadTotem[i] && hasTotemNow) {
-                                    logDebug("Totem moved to hotbar slot " + i + " via shift+click");
+                                    DebugAPI.logPluginDebug("Totem moved to hotbar slot " + i + " via shift+click");
                                     plugin.getDeathManager().playerSlotChanged(player, i);
                                     return;
                                 }
                             }
-                        }, 1L);
+                        }, 50L, TimeUnit.MILLISECONDS);
                     }
                 }
             }

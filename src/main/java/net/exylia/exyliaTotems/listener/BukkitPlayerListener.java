@@ -2,6 +2,7 @@ package net.exylia.exyliaTotems.listener;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import net.exylia.commons.v2.debug.api.DebugAPI;
 import net.exylia.exyliaTotems.ExyliaTotems;
 import net.exylia.exyliaTotems.configs.MainConfig;
 import org.bukkit.Bukkit;
@@ -20,8 +21,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static net.exylia.commons.utils.DebugUtils.logDebug;
-
 public class BukkitPlayerListener implements Listener {
     private final ExyliaTotems plugin;
 
@@ -29,30 +28,30 @@ public class BukkitPlayerListener implements Listener {
 
     public BukkitPlayerListener(ExyliaTotems plugin) {
         this.plugin = plugin;
-        this.cache = CacheBuilder.newBuilder().expireAfterWrite(MainConfig.totemsDelayTicks() * 51L, TimeUnit.MILLISECONDS).build();
+        this.cache = CacheBuilder.newBuilder().expireAfterWrite(MainConfig.Totem.DELAY_TICKS * 51L, TimeUnit.MILLISECONDS).build();
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
-        logDebug("Player " + player.getName() + " died - checking conditions");
+        DebugAPI.logPluginDebug("Player " + player.getName() + " died - checking conditions");
 
         if (!(player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE)) {
-            logDebug("Player " + player.getName() + " not in survival/adventure mode, ignoring");
+            DebugAPI.logPluginDebug("Player " + player.getName() + " not in survival/adventure mode, ignoring");
             return;
         }
         if (player.getLastDamageCause() == null) {
-            logDebug("Player " + player.getName() + " has no damage cause, ignoring");
+            DebugAPI.logPluginDebug("Player " + player.getName() + " has no damage cause, ignoring");
             return;
         }
         EntityDamageEvent.DamageCause cause = player.getLastDamageCause().getCause();
         if (cause == EntityDamageEvent.DamageCause.VOID || cause == EntityDamageEvent.DamageCause.SUICIDE || cause == EntityDamageEvent.DamageCause.KILL) {
-            logDebug("Player " + player.getName() + " died from excluded cause: " + cause + ", ignoring");
+            DebugAPI.logPluginDebug("Player " + player.getName() + " died from excluded cause: " + cause + ", ignoring");
             return;
         }
         if (cache.getIfPresent(player.getUniqueId()) != null) {
-            logDebug("Player " + player.getName() + " is in cache cooldown, ignoring");
+            DebugAPI.logPluginDebug("Player " + player.getName() + " is in cache cooldown, ignoring");
             return;
         }
 
@@ -70,10 +69,10 @@ public class BukkitPlayerListener implements Listener {
             totemSlots.add(40);
         }
 
-        logDebug("Player " + player.getName() + " - Found totems in slots: " + totemSlots + ", current held slot: " + player.getInventory().getHeldItemSlot());
+        DebugAPI.logPluginDebug("Player " + player.getName() + " - Found totems in slots: " + totemSlots + ", current held slot: " + player.getInventory().getHeldItemSlot());
 
         if (!totemSlots.isEmpty()) {
-            logDebug("Player " + player.getName() + " has totems - cancelling death event and starting anti-ghost check");
+            DebugAPI.logPluginDebug("Player " + player.getName() + " has totems - cancelling death event and starting anti-ghost check");
             event.setCancelled(true);
             event.deathMessage(null);
             event.getDrops().clear();
@@ -81,7 +80,7 @@ public class BukkitPlayerListener implements Listener {
 
             plugin.getDeathManager().handlePlayerDeath(player, player.getInventory().getHeldItemSlot(), totemSlots);
         } else {
-            logDebug("Player " + player.getName() + " has no totems - allowing normal death");
+            DebugAPI.logPluginDebug("Player " + player.getName() + " has no totems - allowing normal death");
         }
     }
 }
