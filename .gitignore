@@ -1,0 +1,43 @@
+# Build output
+build/
+bin/
+dist/
+out/
+target/
+
+# Gradle
+.gradle/
+
+# The wrapper properties pin the Gradle version and are tracked; the
+# downloaded jar and launch scripts are not.
+gradle/wrapper/gradle-wrapper.jar
+gradlew
+gradlew.bat
+
+# IDE
+.idea/
+.idea_modules/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# System
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.swp
+*.tmp
+*.bak
+*.old
+
+# Credentials — never committed
+*.env
+*.key
+*.pem
+*.jks
+*.keystore
+*.p12

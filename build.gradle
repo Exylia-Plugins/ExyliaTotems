@@ -1,12 +1,12 @@
 plugins {
     id 'java'
-    id 'com.gradleup.shadow' version '8.3.0'
+    id 'com.gradleup.shadow' version '8.3.11'
     id("io.freefair.lombok") version "8.14"
 }
 
 def pluginName = 'ExyliaTotems'
 def mainPackage = 'net.exylia'
-def outputDirectory = "target/"
+def outputDirectory = "/root/Java/jars/plugins"
 
 group = mainPackage
 version = '1.0.0'
@@ -38,7 +38,7 @@ repositories {
 dependencies {
     implementation("${mainPackage}:ExyliaCommons:1.0.0")
     compileOnly 'io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT'
-    compileOnly("com.github.retrooper:packetevents-spigot:2.9.5")
+    compileOnly("com.github.retrooper:packetevents-spigot:2.13.0")
 }
 
 def targetJavaVersion = 17

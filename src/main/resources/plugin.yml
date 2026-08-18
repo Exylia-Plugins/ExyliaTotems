@@ -11,7 +11,6 @@ folia-supported: true
 softdepend:
   - PlaceholderAPI
   - Worlds
-  - packetevents
   - WorldGuard
   - Apollo-Bukkit
   - Apollo
@@ -27,9 +26,9 @@ libraries:
   - 'org.xerial:sqlite-jdbc:3.45.2.0'
   - 'redis.clients:jedis:5.1.0'
   - 'com.github.ben-manes.caffeine:caffeine:3.2.2'
-  - 'io.github.revxrsal:lamp.common:4.0.0-rc.14'
-  - 'io.github.revxrsal:lamp.bukkit:4.0.0-rc.14'
-  - 'io.github.revxrsal:lamp.brigadier:4.0.0-rc.14'
+  - 'io.github.revxrsal:lamp.common:4.0.0-rc.17'
+  - 'io.github.revxrsal:lamp.bukkit:4.0.0-rc.17'
+  - 'io.github.revxrsal:lamp.brigadier:4.0.0-rc.17'
 
 commands:
   exyliatotem-reload:
