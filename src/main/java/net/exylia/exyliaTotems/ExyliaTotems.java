@@ -3,37 +3,69 @@ package net.exylia.exyliaTotems;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
-import lombok.Getter;
-import net.exylia.commons.v2.debug.api.DebugAPI;
+import net.exylia.lib.config.ConfigFile;
+import net.exylia.lib.config.Configs;
+import net.exylia.lib.debug.Debug;
+import net.exylia.lib.reload.Reloads;
 import net.exylia.exyliaTotems.command.ReloadCommand;
-import net.exylia.exyliaTotems.listener.PacketEventsListener;
+import net.exylia.exyliaTotems.configs.TotemSettings;
 import net.exylia.exyliaTotems.listener.BukkitPlayerListener;
+import net.exylia.exyliaTotems.listener.PacketEventsListener;
 import net.exylia.exyliaTotems.managers.DeathManager;
-import net.exylia.commons.ExyliaPlugin;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.plugin.java.JavaPlugin;
 
-@Getter
-public final class ExyliaTotems extends ExyliaPlugin {
-    private DeathManager deathManager;
+/**
+ * Honours a totem the player reached for a moment too late.
+ *
+ * <p>A player on a bad connection dies on the server before their swap packet
+ * arrives. Their death is held open for a few ticks, and what they did in that
+ * window decides whether the totem counts.
+ */
+public final class ExyliaTotems extends JavaPlugin {
 
+    private Debug debug;
+    private ConfigFile<TotemSettings> settings;
+    private DeathManager deaths;
+    private Reloads reloads;
+
+    @Override
     public void onLoad() {
         PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
         PacketEvents.getAPI().load();
-        PacketEvents.getAPI().getEventManager().registerListener(new PacketEventsListener(this), PacketListenerPriority.LOWEST);
+        PacketEvents.getAPI().getEventManager()
+                .registerListener(new PacketEventsListener(this), PacketListenerPriority.LOWEST);
     }
 
     @Override
-    protected void onExyliaEnable() {
-        DebugAPI.init(this);
+    public void onEnable() {
+        debug = Debug.of(this);
+        settings = Configs.define(this, "config", TotemSettings.class).load();
 
         PacketEvents.getAPI().init();
-        this.deathManager = new DeathManager();
+        deaths = new DeathManager(this);
         new BukkitPlayerListener(this);
 
-        getCommand("exyliatotem-reload").setExecutor(new ReloadCommand());
+        PluginCommand command = getCommand("exyliatotem-reload");
+        if (command != null) {
+            command.setExecutor(new ReloadCommand(this));
+        } else {
+            debug.warn("Command exyliatotem-reload is missing from plugin.yml and was not registered");
+        }
+
+        reloads = Reloads.of(this).step("configs", () -> Configs.reloadAll(this));
+
+        debug.motd();
     }
 
     @Override
-    protected void onExyliaDisable() {
+    public void onDisable() {
         PacketEvents.getAPI().terminate();
     }
+
+    public Debug debug() { return debug; }
+    public TotemSettings settings() { return settings.get(); }
+    public DeathManager deaths() { return deaths; }
+    public void reload(CommandSender sender) { reloads.run(sender); }
 }

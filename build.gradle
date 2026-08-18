@@ -35,13 +35,30 @@ repositories {
     }
 }
 
-dependencies {
-    implementation("${mainPackage}:ExyliaCommons:1.0.0")
-    compileOnly 'io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT'
-    compileOnly("com.github.retrooper:packetevents-spigot:2.13.0")
+/**
+ * ExyliaLib is always consumed at its newest release.
+ *
+ * Dynamic versions are cached for 24 hours by default, which would keep a build
+ * compiling against yesterday's library after a new one is published. "Always
+ * the latest" has to mean this build, not the one after the cache expires.
+ */
+configurations {
+    exyliaLib
+    compileOnly.extendsFrom(exyliaLib)
 }
 
-def targetJavaVersion = 17
+configurations.configureEach {
+    resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+}
+
+dependencies {
+    exyliaLib 'net.exylia:ExyliaLib:latest.release'
+    compileOnly 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
+    compileOnly("com.github.retrooper:packetevents-spigot:2.13.0")
+    compileOnly 'com.github.ben-manes.caffeine:caffeine:3.2.4'
+}
+
+def targetJavaVersion = 21
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
@@ -73,7 +90,6 @@ shadowJar {
     archiveClassifier.set('')
     destinationDirectory = file(outputDirectory)
     minimize()
-    relocate "${mainPackage}.commons", "${mainPackage}.libs.commons"
     relocate "com.hapangama", "${mainPackage}.libs.sl"
     relocate "com.github.lalyos.jfiglet", "${mainPackage}.libs.jfiglet"
 }
