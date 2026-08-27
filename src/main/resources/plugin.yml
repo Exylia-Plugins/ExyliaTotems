@@ -6,8 +6,13 @@ authors: [ DiGround ]
 description: If you need help, join to my discord.
 website: https://link.exylia.net/@services
 folia-supported: true
-depend:
+softdepend:
+  # Soft on purpose: a hard depend stops this plugin from loading when
+  # ExyliaLib is absent, and the loader that would install ExyliaLib is
+  # exactly what has to load for the install to happen.
   - ExyliaLib
+
+depend:
   - packetevents
 commands:
   exyliatotem-reload:
