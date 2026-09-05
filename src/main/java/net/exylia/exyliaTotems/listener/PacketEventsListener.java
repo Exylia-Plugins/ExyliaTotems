@@ -21,7 +21,7 @@ public class PacketEventsListener implements PacketListener {
 
     @Override
     public void onPacketReceive(PacketReceiveEvent e) {
-        // Caso 1: cambio de slot en hotbar (scroll, números)
+        // Case 1: hotbar slot change (scroll, number keys)
         if (e.getPacketType() == PacketType.Play.Client.HELD_ITEM_CHANGE) {
             WrapperPlayClientHeldItemChange packet = new WrapperPlayClientHeldItemChange(e);
             Player player = (Player) e.getPlayer();
@@ -29,7 +29,7 @@ public class PacketEventsListener implements PacketListener {
             return;
         }
 
-        // Caso 2: tecla F en juego normal (swap rápido con offhand)
+        // Case 2: F key during normal play (quick swap with the offhand)
         if (e.getPacketType() == PacketType.Play.Client.PLAYER_DIGGING) {
             WrapperPlayClientPlayerDigging packet = new WrapperPlayClientPlayerDigging(e);
             if (packet.getAction() == DiggingAction.SWAP_ITEM_WITH_OFFHAND) {
@@ -39,19 +39,19 @@ public class PacketEventsListener implements PacketListener {
             return;
         }
 
-        // Caso 3: tecla F dentro del inventario o drag directo a offhand
+        // Case 3: F key inside the inventory, or a direct drag to the offhand
         if (e.getPacketType() == PacketType.Play.Client.CLICK_WINDOW) {
             WrapperPlayClientClickWindow packet = new WrapperPlayClientClickWindow(e);
             Player player = (Player) e.getPlayer();
 
-            // Tecla F dentro del inventario (swap con offhand)
+            // F key inside the inventory (swap with the offhand)
             if (packet.getWindowClickType() == WrapperPlayClientClickWindow.WindowClickType.SWAP
                     && packet.getButton() == 40) {
                 plugin.deaths().playerOffhandSwitch(player);
                 return;
             }
 
-            // Números 1-9 dentro del inventario (swap con hotbar)
+            // Number keys 1-9 inside the inventory (swap with the hotbar)
             if (packet.getWindowClickType() == WrapperPlayClientClickWindow.WindowClickType.SWAP
                     && packet.getButton() >= 0 && packet.getButton() <= 8) {
                 int targetSlot = packet.getButton();
@@ -66,33 +66,33 @@ public class PacketEventsListener implements PacketListener {
                 return;
             }
 
-            // Click directo en slot 45 (offhand en inventario de jugador)
+            // Direct click on slot 45 (offhand in the player inventory)
             if (packet.getSlot() == 45) {
                 plugin.deaths().playerOffhandSwitch(player);
                 return;
             }
 
-            // Shift+Click para mover automáticamente items
+            // Shift+Click to move items automatically
             if (packet.getWindowClickType() == WrapperPlayClientClickWindow.WindowClickType.QUICK_MOVE) {
-                // Verificar si el item que se está moviendo es un totem
-                if (packet.getSlot() >= 9) { // Solo si viene del inventario principal (no hotbar)
+                // Check whether the item being moved is a totem
+                if (packet.getSlot() >= 9) { // Only if it comes from the main inventory (not the hotbar)
                     org.bukkit.inventory.ItemStack clickedItem = player.getInventory().getItem(packet.getSlot());
                     if (clickedItem != null && clickedItem.getType() == Material.TOTEM_OF_UNDYING) {
 
-                        // Tomar snapshot de la hotbar actual ANTES del movimiento
+                        // Snapshot the current hotbar BEFORE the move
                         boolean[] hotbarHadTotem = new boolean[9];
                         for (int i = 0; i < 9; i++) {
                             org.bukkit.inventory.ItemStack item = player.getInventory().getItem(i);
                             hotbarHadTotem[i] = (item != null && item.getType() == Material.TOTEM_OF_UNDYING);
                         }
 
-                        // Verificar después del movimiento qué slot cambió
+                        // After the move, check which slot changed
                         Tasks.of(plugin).runAtEntityLater(player, 1L, () -> {
                             for (int i = 0; i < 9; i++) {
                                 org.bukkit.inventory.ItemStack item = player.getInventory().getItem(i);
                                 boolean hasTotemNow = (item != null && item.getType() == Material.TOTEM_OF_UNDYING);
 
-                                // Si antes no tenía totem y ahora sí = aquí se movió el totem
+                                // No totem before and one now = the totem moved here
                                 if (!hotbarHadTotem[i] && hasTotemNow) {
                                     plugin.deaths().playerSlotChanged(player, i);
                                     return;
