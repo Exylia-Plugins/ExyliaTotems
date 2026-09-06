@@ -2,6 +2,7 @@ package net.exylia.exyliaTotems.managers;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import net.exylia.lib.api.totems.event.PlayerTotemSaveEvent;
 import net.exylia.lib.debug.Debug;
 import net.exylia.lib.task.TaskScheduler;
 import net.exylia.lib.task.Tasks;
@@ -99,7 +100,7 @@ public class DeathManager {
         Boolean swappedToOffhand = offhandSwaps.getIfPresent(id);
 
         if (Boolean.TRUE.equals(swappedToOffhand) && consumeOffhandTotem(player)) {
-            save(player, "off hand");
+            save(player, OFFHAND_SLOT);
             return;
         }
 
@@ -107,7 +108,7 @@ public class DeathManager {
         if (heldSlot == null) {
             if (totemSlots.contains(serverSlot)) {
                 consumeFromSlot(player, serverSlot);
-                save(player, "slot " + serverSlot);
+                save(player, serverSlot);
             } else {
                 die(player);
             }
@@ -119,7 +120,7 @@ public class DeathManager {
             int slot = totemSlots.contains(serverSlot) ? serverSlot : heldSlot;
             if (isTotem(player.getInventory().getItem(slot))) {
                 consumeFromSlot(player, slot);
-                save(player, "slot " + slot);
+                save(player, slot);
             } else {
                 die(player);
             }
@@ -135,7 +136,7 @@ public class DeathManager {
 
         player.getInventory().setHeldItemSlot(heldSlot);
         consumeFromSlot(player, heldSlot);
-        save(player, "slot " + heldSlot);
+        save(player, heldSlot);
     }
 
     /** Remembers a hotbar change, if it came soon enough after a death. */
@@ -203,10 +204,24 @@ public class DeathManager {
         countStatistic(player);
     }
 
-    private void save(Player player, String where) {
+    /**
+     * Settles a save and tells the rest of the server it happened.
+     *
+     * <p>The event is the only notice anybody else gets. The death was
+     * cancelled and the real totem never fired, so neither
+     * {@code PlayerDeathEvent} nor {@code EntityResurrectEvent} reaches a
+     * plugin watching for one.
+     *
+     * @param player who was saved
+     * @param slot   where the totem came from, {@code 40} for the off hand
+     */
+    private void save(Player player, int slot) {
         forget(player.getUniqueId());
         Text.of(plugin.settings().messages().saved()).send(player);
-        debug.debug(player.getName() + " was saved from ghosting, from " + where);
+        boolean offHand = slot == OFFHAND_SLOT;
+        debug.debug(player.getName() + " was saved from ghosting, from "
+                + (offHand ? "off hand" : "slot " + slot));
+        plugin.getServer().getPluginManager().callEvent(new PlayerTotemSaveEvent(player, slot));
     }
 
     /**
