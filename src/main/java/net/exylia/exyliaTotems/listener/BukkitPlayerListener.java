@@ -3,6 +3,7 @@ package net.exylia.exyliaTotems.listener;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.exylia.exyliaTotems.ExyliaTotems;
+import net.exylia.lib.api.totems.event.PlayerTotemHoldEvent;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -66,6 +67,9 @@ public class BukkitPlayerListener implements Listener {
 
         List<Integer> totemSlots = totemSlots(player);
         if (totemSlots.isEmpty()) return;
+
+        // A plugin that runs its own deaths can keep this one out of our hands.
+        if (!new PlayerTotemHoldEvent(player).callEvent()) return;
 
         deciding.put(player.getUniqueId(), System.currentTimeMillis());
 
