@@ -8,6 +8,7 @@ import net.exylia.lib.config.Configs;
 import net.exylia.lib.debug.Debug;
 import net.exylia.lib.reload.Reloads;
 import net.exylia.exyliaTotems.command.ReloadCommand;
+import net.exylia.exyliaTotems.configs.TotemMessages;
 import net.exylia.exyliaTotems.configs.TotemSettings;
 import net.exylia.exyliaTotems.listener.BukkitPlayerListener;
 import net.exylia.exyliaTotems.listener.PacketEventsListener;
@@ -27,6 +28,7 @@ public final class ExyliaTotems extends JavaPlugin {
 
     private Debug debug;
     private ConfigFile<TotemSettings> settings;
+    private ConfigFile<TotemMessages> messages;
     private DeathManager deaths;
     private Reloads reloads;
 
@@ -42,6 +44,7 @@ public final class ExyliaTotems extends JavaPlugin {
     public void onEnable() {
         debug = Debug.of(this);
         settings = Configs.define(this, "config", TotemSettings.class).load();
+        messages = Configs.define(this, "messages", TotemMessages.class).load();
 
         PacketEvents.getAPI().init();
         deaths = new DeathManager(this);
@@ -66,6 +69,7 @@ public final class ExyliaTotems extends JavaPlugin {
 
     public Debug debug() { return debug; }
     public TotemSettings settings() { return settings.get(); }
+    public TotemMessages messages() { return messages.get(); }
     public DeathManager deaths() { return deaths; }
     public void reload(CommandSender sender) { reloads.run(sender); }
 }

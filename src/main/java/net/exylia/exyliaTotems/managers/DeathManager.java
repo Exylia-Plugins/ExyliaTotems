@@ -217,7 +217,7 @@ public class DeathManager {
      */
     private void save(Player player, int slot) {
         forget(player.getUniqueId());
-        Text.of(plugin.settings().messages().saved()).send(player);
+        Text.of(plugin.messages().saved()).send(player);
         boolean offHand = slot == OFFHAND_SLOT;
         debug.debug(player.getName() + " was saved from ghosting, from "
                 + (offHand ? "off hand" : "slot " + slot));

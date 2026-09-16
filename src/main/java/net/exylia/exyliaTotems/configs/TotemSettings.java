@@ -10,10 +10,10 @@ import net.exylia.lib.config.Key;
  * packets, so it must not go looking a value up by string while a player is
  * mid-save.
  */
-public record TotemSettings(Totem totem, Messages messages) {
+public record TotemSettings(Totem totem) {
 
     public TotemSettings() {
-        this(new Totem(), new Messages());
+        this(new Totem());
     }
 
     public record Totem(
@@ -26,18 +26,4 @@ public record TotemSettings(Totem totem, Messages messages) {
         }
     }
 
-    /**
-     * What the player is told.
-     *
-     * <p>The saved message used to be written into three places in Java, so a
-     * server owner could not change a word of it and the three could drift.
-     */
-    public record Messages(
-            @Comment("Sent to a player whose totem was honoured despite their ping")
-            String saved) {
-
-        public Messages() {
-            this("{primary}&lE-TOTEMS &8•&r {success}We saved you because of your ping difference.");
-        }
-    }
 }
