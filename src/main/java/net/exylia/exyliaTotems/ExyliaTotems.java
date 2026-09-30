@@ -43,8 +43,11 @@ public final class ExyliaTotems extends JavaPlugin {
     @Override
     public void onEnable() {
         debug = Debug.of(this);
-        settings = Configs.define(this, "config", TotemSettings.class).load();
-        messages = Configs.define(this, "messages", TotemMessages.class).load();
+        settings = Configs.define(this, "config", TotemSettings.class)
+                .version(2)
+                .migration(1, TotemSettings.MIGRATION_FROM_1)
+                .load();
+        messages = Configs.define(this, "messages", TotemMessages.class).translated().load();
 
         PacketEvents.getAPI().init();
         deaths = new DeathManager(this);
