@@ -27,3 +27,15 @@ jobs:
           cp "build/libs/ExyliaTotems-${version}.jar" build/libs/ExyliaTotems.jar
           gh release create "$GITHUB_REF_NAME" "build/libs/ExyliaTotems-${version}.jar" build/libs/ExyliaTotems.jar \
             --title "ExyliaTotems ${version}" --generate-notes
+
+  # Mirrors the release above to Modrinth; skipped while MODRINTH_TOKEN or the project id is unset.
+  modrinth:
+    needs: release
+    uses: Exylia-Plugins/.github/.github/workflows/modrinth.yml@main
+    with:
+      version: ${{ github.ref_name }}
+      name: ExyliaTotems
+      project-id: ${{ vars.MODRINTH_PROJECT_ID }}
+      loaders: '["folia","paper","purpur"]'
+      dependencies: '[{"project_id":"G0BDxMIG","dependency_type":"required"},{"project_id":"HYKaKraK","dependency_type":"required"}]'
+    secrets: inherit
