@@ -2,7 +2,6 @@ package net.exylia.exyliaTotems;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
-import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import net.exylia.lib.config.ConfigFile;
 import net.exylia.lib.config.Configs;
 import net.exylia.lib.debug.Debug;
@@ -24,52 +23,48 @@ import org.bukkit.plugin.java.JavaPlugin;
  * arrives. Their death is held open for a few ticks, and what they did in that
  * window decides whether the totem counts.
  */
-public final class ExyliaTotems extends JavaPlugin {
+public final class ExyliaTotems {
 
+    private JavaPlugin plugin;
     private Debug debug;
     private ConfigFile<TotemSettings> settings;
     private ConfigFile<TotemMessages> messages;
     private DeathManager deaths;
     private Reloads reloads;
 
-    @Override
-    public void onLoad() {
-        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
-        PacketEvents.getAPI().load();
-        PacketEvents.getAPI().getEventManager()
-                .registerListener(new PacketEventsListener(this), PacketListenerPriority.LOWEST);
-    }
-
-    @Override
-    public void onEnable() {
-        debug = Debug.of(this);
-        settings = Configs.define(this, "config", TotemSettings.class)
+    /** Not the Bukkit plugin itself: {@link ExyliaTotemsPlugin} is, so it can install ExyliaLib first. */
+    public void start(JavaPlugin plugin) {
+        this.plugin = plugin;
+        debug = Debug.of(plugin);
+        settings = Configs.define(plugin, "config", TotemSettings.class)
                 .version(2)
                 .migration(1, TotemSettings.MIGRATION_FROM_1)
                 .load();
-        messages = Configs.define(this, "messages", TotemMessages.class).translated().load();
+        messages = Configs.define(plugin, "messages", TotemMessages.class).translated().load();
 
-        PacketEvents.getAPI().init();
         deaths = new DeathManager(this);
+        PacketEvents.getAPI().getEventManager()
+                .registerListener(new PacketEventsListener(this), PacketListenerPriority.LOWEST);
+        PacketEvents.getAPI().init();
         new BukkitPlayerListener(this);
 
-        PluginCommand command = getCommand("exyliatotem-reload");
+        PluginCommand command = plugin.getCommand("exyliatotem-reload");
         if (command != null) {
             command.setExecutor(new ReloadCommand(this));
         } else {
             debug.warn("Command exyliatotem-reload is missing from plugin.yml and was not registered");
         }
 
-        reloads = Reloads.of(this).step("configs", () -> Configs.reloadAll(this));
+        reloads = Reloads.of(plugin).step("configs", () -> Configs.reloadAll(plugin));
 
         debug.motd();
     }
 
-    @Override
-    public void onDisable() {
+    public void shutdown() {
         PacketEvents.getAPI().terminate();
     }
 
+    public JavaPlugin plugin() { return plugin; }
     public Debug debug() { return debug; }
     public TotemSettings settings() { return settings.get(); }
     public TotemMessages messages() { return messages.get(); }

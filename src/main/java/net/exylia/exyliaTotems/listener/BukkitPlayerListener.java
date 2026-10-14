@@ -45,7 +45,7 @@ public class BukkitPlayerListener implements Listener {
                 .expireAfterWrite(Math.max(1, plugin.settings().totem().delayTicks()) * 51L, TimeUnit.MILLISECONDS)
                 .maximumSize(1000)
                 .build();
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        plugin.plugin().getServer().getPluginManager().registerEvents(this, plugin.plugin());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

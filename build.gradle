@@ -1,83 +1,87 @@
 plugins {
     id 'java'
-    id 'com.gradleup.shadow' version '8.3.11'
-    id("io.freefair.lombok") version "8.14"
+    id 'com.gradleup.shadow' version '8.3.0'
+    id 'io.freefair.lombok' version '8.14'
 }
 
-def pluginName = 'ExyliaTotems'
-def mainPackage = 'net.exylia'
-def outputDirectory = "/root/Java/jars/plugins"
-
-group = mainPackage
+group = 'net.exylia'
 version = '1.0.0'
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-    maven {
-        name = "papermc-repo"
-        url = "https://repo.papermc.io/repository/maven-public/"
-    }
-    maven { url 'https://jitpack.io' }
-    maven { url 'https://oss.sonatype.org/content/groups/public/' }
-    maven { url 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
-    maven { url "https://maven.enginehub.org/repo/" }
-    maven { url "https://repo.dmulloy2.net/repository/public/" }
-    maven { url "https://repo.codemc.org/repository/maven-public/" }
-    maven { url "https://repository.minecodes.pl/releases" }
-    maven {
-        name = "minecraft-libraries"
-        url = uri("https://libraries.minecraft.net")
-    }
-    maven {
-        name = "sundevs"
-        url = uri("https://repo.hapangama.com/releases")
-    }
-}
-
-/**
- * ExyliaLib is always consumed at its newest release.
- *
- * Dynamic versions are cached for 24 hours by default, which would keep a build
- * compiling against yesterday's library after a new one is published. "Always
- * the latest" has to mean this build, not the one after the cache expires.
+/*
+ * ExyliaLib is always the newest one: the latest release on GitHub, or a newer one published to
+ * mavenLocal while the library and this plugin change together. The version built against is
+ * also the oldest the jar runs on (plugin.yml's exylia-lib), and ExyliaLib keeps itself updated
+ * on every server, so building against anything older only hides what a server already has.
+ * -PexyliaLibVersion=x.y.z pins one, for a build that has to be reproduced.
  */
-configurations {
-    exyliaLib
-    compileOnly.extendsFrom(exyliaLib)
+def exyliaLibVersion = providers.gradleProperty('exyliaLibVersion').getOrNull() ?: newestExyliaLib()
+logger.lifecycle("Building against ExyliaLib ${exyliaLibVersion}")
+
+/** The newest of the latest GitHub release and the newest published to mavenLocal. */
+def newestExyliaLib() {
+    def candidates = []
+    try {
+        // The fixed-name asset redirects to the tagged one, which names the version.
+        def connection = new URL('https://github.com/DiGround-s/ExyliaLib/releases/latest/download/ExyliaLib.jar').openConnection()
+        connection.instanceFollowRedirects = false
+        connection.requestMethod = 'HEAD'
+        connection.connectTimeout = 10_000
+        connection.readTimeout = 10_000
+        def tag = (connection.getHeaderField('Location') ?: '') =~ /\/download\/v(\d+\.\d+\.\d+)\//
+        if (tag.find()) candidates << tag.group(1)
+    } catch (IOException offline) {
+        logger.warn("Could not reach GitHub for the latest ExyliaLib: ${offline.message}")
+    }
+    def local = new File(System.getProperty('user.home'), '.m2/repository/net/exylia/ExyliaLib')
+    local.listFiles()?.findAll { it.isDirectory() && it.name ==~ /\d+\.\d+\.\d+/ && new File(it, "ExyliaLib-${it.name}.jar").isFile() }
+            ?.each { candidates << it.name }
+    if (candidates.isEmpty()) {
+        throw new GradleException('No ExyliaLib found: GitHub could not be reached and none is in mavenLocal. '
+                + 'Pass -PexyliaLibVersion=x.y.z to build against a known one.')
+    }
+    return candidates.max { a, b ->
+        def x = a.tokenize('.')*.toInteger()
+        def y = b.tokenize('.')*.toInteger()
+        (0..2).collect { x[it] <=> y[it] }.find { it != 0 } ?: 0
+    }
 }
 
-configurations.configureEach {
-    resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+repositories {
+    // A locally published ExyliaLib wins, so a change to both can be built before the library is released.
+    mavenLocal()
+    mavenCentral()
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+    maven { url = 'https://repo.codemc.io/repository/maven-releases/' }
+    // ExyliaLib is attached to every release on GitHub; this reads it from there.
+    ivy {
+        name = 'ExyliaLib releases'
+        url = 'https://github.com/DiGround-s/ExyliaLib/releases/download/'
+        patternLayout { artifact 'v[revision]/[module]-[revision].[ext]' }
+        metadataSources { artifact() }
+        content { includeModule('net.exylia', 'ExyliaLib') }
+    }
 }
 
 dependencies {
-    exyliaLib 'net.exylia:ExyliaLib:latest.release'
     compileOnly 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
-    compileOnly("com.github.retrooper:packetevents-spigot:2.13.0")
+    // Installed on the server as its own plugin, never shaded: one copy, one cache.
+    compileOnly "net.exylia:ExyliaLib:${exyliaLibVersion}"
+    compileOnly 'com.github.retrooper:packetevents-spigot:2.13.0'
     compileOnly 'com.github.ben-manes.caffeine:caffeine:3.2.4'
 }
 
-def targetJavaVersion = 21
 java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        options.release.set(targetJavaVersion)
-    }
+    options.compilerArgs << '-parameters'
+    options.release.set(21)
 }
 
 processResources {
-    def props = [version: version]
+    def props = [version: version, exyliaLibVersion: exyliaLibVersion]
     inputs.properties props
     filteringCharset 'UTF-8'
     filesMatching('plugin.yml') {
@@ -86,10 +90,20 @@ processResources {
 }
 
 shadowJar {
-    archiveBaseName.set(pluginName)
+    archiveBaseName.set('ExyliaTotems')
     archiveClassifier.set('')
-    destinationDirectory = file(outputDirectory)
-    minimize()
-    relocate "com.hapangama", "${mainPackage}.libs.sl"
-    relocate "com.github.lalyos.jfiglet", "${mainPackage}.libs.jfiglet"
+    // Set exyliaOutputDir in ~/.gradle/gradle.properties to drop the jar straight into a server.
+    if (project.hasProperty('exyliaOutputDir')) {
+        destinationDirectory = file("${exyliaOutputDir}/plugins")
+    }
+    exclude 'META-INF/versions/**'
+}
+
+tasks.named('build') {
+    dependsOn shadowJar
+}
+
+// The plain jar keeps its own name, so build/libs holds one ExyliaTotems-<version>.jar: the one to install.
+jar {
+    archiveClassifier.set('plain')
 }

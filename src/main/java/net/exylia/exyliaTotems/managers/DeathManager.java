@@ -65,7 +65,7 @@ public class DeathManager {
     public DeathManager(ExyliaTotems plugin) {
         this.plugin = plugin;
         this.debug = plugin.debug();
-        this.tasks = Tasks.of(plugin);
+        this.tasks = Tasks.of(plugin.plugin());
 
         this.heldSlots = expiring();
         this.offhandSwaps = expiring();
@@ -221,7 +221,7 @@ public class DeathManager {
         boolean offHand = slot == OFFHAND_SLOT;
         debug.debug(player.getName() + " was saved from ghosting, from "
                 + (offHand ? "off hand" : "slot " + slot));
-        plugin.getServer().getPluginManager().callEvent(new PlayerTotemSaveEvent(player, slot));
+        plugin.plugin().getServer().getPluginManager().callEvent(new PlayerTotemSaveEvent(player, slot));
     }
 
     /**

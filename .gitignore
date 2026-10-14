@@ -1,27 +1,20 @@
 # Build output
+.gradle/
 build/
 bin/
-dist/
 out/
+dist/
 target/
-
-# Gradle
-.gradle/
-
-# The wrapper properties pin the Gradle version and are tracked; the
-# downloaded jar and launch scripts are not.
-gradle/wrapper/gradle-wrapper.jar
-gradlew
-gradlew.bat
+*.class
 
 # IDE
+.settings/
+.project
+.classpath
+.factorypath
 .idea/
-.idea_modules/
 *.iml
 .vscode/
-.settings/
-.classpath
-.project
 
 # System
 .DS_Store
@@ -29,12 +22,12 @@ Thumbs.db
 
 # Logs and temporary files
 *.log
-*.swp
-*.tmp
-*.bak
-*.old
 
-# Credentials — never committed
+# Tooling
+.atl/
+.codegraph/
+
+# Credentials, never committed
 *.env
 *.key
 *.pem

@@ -87,7 +87,7 @@ public class PacketEventsListener implements PacketListener {
                         }
 
                         // After the move, check which slot changed
-                        Tasks.of(plugin).runAtEntityLater(player, 1L, () -> {
+                        Tasks.of(plugin.plugin()).runAtEntityLater(player, 1L, () -> {
                             for (int i = 0; i < 9; i++) {
                                 org.bukkit.inventory.ItemStack item = player.getInventory().getItem(i);
                                 boolean hasTotemNow = (item != null && item.getType() == Material.TOTEM_OF_UNDYING);

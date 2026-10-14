@@ -1,15 +1,20 @@
 name: ExyliaTotems
 version: '${version}'
-main: net.exylia.exyliaTotems.ExyliaTotems
+main: net.exylia.exyliaTotems.ExyliaTotemsPlugin
 api-version: '1.21'
 authors: [ DiGround ]
-description: If you need help, join to my discord.
-website: https://link.exylia.net/@services
+website: https://github.com/Exylia-Plugins/ExyliaTotems
+description: Honours a totem of undying the player reached for a moment too late because of ping.
+
+# Kept up to date by ExyliaLib from this repository's GitHub releases.
+exylia-updates: Exylia-Plugins/ExyliaTotems
+# The oldest ExyliaLib this build runs on; ExyliaLib holds back an update that needs a newer one.
+exylia-lib: '${exyliaLibVersion}'
+
 folia-supported: true
 softdepend:
-  # Soft on purpose: a hard depend stops this plugin from loading when
-  # ExyliaLib is absent, and the loader that would install ExyliaLib is
-  # exactly what has to load for the install to happen.
+  # Required, but soft so this plugin still starts without it: it then downloads ExyliaLib
+  # and asks for a restart.
   - ExyliaLib
 
 depend:
