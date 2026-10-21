@@ -10,5 +10,5 @@ Saves a player whose totem of undying arrived a few ticks too late because of pi
 ## ExyliaLib
 
 - Always the newest: `build.gradle` resolves the latest GitHub release (or a newer one in mavenLocal) at build time, and that version becomes plugin.yml's `exylia-lib`. There is no pinned version to bump; `-PexyliaLibVersion` pins one for a single build.
-- `ExyliaTotemsPlugin` is the Bukkit entry point and touches no ExyliaLib type: without ExyliaLib it runs `bootstrap/ExyliaLibInstaller` (downloads the latest release, falling back to the built-against one) and disables itself until the restart. With it, it hands over to the core, `ExyliaTotems`.
+- `ExyliaTotemsPlugin` is the Bukkit entry point and touches no ExyliaLib type: without ExyliaLib it runs `bootstrap/ExyliaLibMissing` (logs where to download it; nothing is downloaded without the owner) and disables itself until the restart. With it, it hands over to the core, `ExyliaTotems`.
 - Updates of this plugin come from ExyliaLib's `PluginUpdater` (`exylia-updates` in plugin.yml, the fixed-name `ExyliaTotems.jar` on every release).
