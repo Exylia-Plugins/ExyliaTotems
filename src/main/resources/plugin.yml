@@ -24,6 +24,11 @@ commands:
     description: Reload plugin configuration
     usage: /exyliatotem-reload
 
+permissions:
+  exyliatotems.admin:
+    description: "Reload ExyliaTotems with /exyliatotem-reload."
+    default: op
+
 libraries:
   # The same list ExyliaLib declares, in the same order and the same versions.
   # The server's library loader fetches each one once and shares it, so a plugin

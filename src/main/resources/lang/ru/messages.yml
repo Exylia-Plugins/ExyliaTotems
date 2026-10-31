@@ -1,1 +1,2 @@
 saved: '{primary}&lE-TOTEMS &8•&r {success}Мы спасли тебя с учётом разницы в пинге.'
+no-permission: '[sound:ENTITY_VILLAGER_NO|1.0|1.0]{primary}&lE-TOTEMS &8•&r {error}У тебя нет прав на это.'
