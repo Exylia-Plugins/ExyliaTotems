@@ -28,7 +28,7 @@ public class ReloadCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, String[] args) {
         if (!sender.hasPermission(ADMIN)) {
-            Text.of(plugin.messages().noPermission()).send(sender);
+            Text.from(plugin.plugin(), plugin.messages().noPermission()).send(sender);
             return true;
         }
         plugin.reload(sender);

@@ -6,6 +6,7 @@ import net.exylia.lib.config.ConfigFile;
 import net.exylia.lib.config.Configs;
 import net.exylia.lib.debug.Debug;
 import net.exylia.lib.reload.Reloads;
+import net.exylia.lib.text.Prefixes;
 import net.exylia.exyliaTotems.command.ReloadCommand;
 import net.exylia.exyliaTotems.configs.TotemMessages;
 import net.exylia.exyliaTotems.configs.TotemSettings;
@@ -41,6 +42,7 @@ public final class ExyliaTotems {
                 .migration(1, TotemSettings.MIGRATION_FROM_1)
                 .load();
         messages = Configs.define(plugin, "messages", TotemMessages.class).translated().load();
+        Prefixes.set(plugin, messages().prefix());
 
         deaths = new DeathManager(this);
         PacketEvents.getAPI().getEventManager()
@@ -55,7 +57,8 @@ public final class ExyliaTotems {
             debug.warn("Command exyliatotem-reload is missing from plugin.yml and was not registered");
         }
 
-        reloads = Reloads.of(plugin).step("configs", () -> Configs.reloadAll(plugin));
+        reloads = Reloads.of(plugin).step("configs", () -> Configs.reloadAll(plugin))
+                .step("prefix", () -> Prefixes.set(plugin, messages().prefix()));
 
         debug.motd();
     }
