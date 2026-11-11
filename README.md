@@ -19,7 +19,7 @@ ExyliaLib checks this plugin's GitHub releases and announces a new version in th
 - **`config.yml`**: `totem.delay-ticks` (default `3`) is how long a death is held open. Longer forgives worse pings. `language` picks the messages' language (`default` follows ExyliaLib's).
 - **`lang/<code>/messages.yml`**: the message shown when a player is saved, in English, Spanish, Portuguese, French, Russian and Turkish.
 
-`/exyliatotem-reload` reloads both.
+`/totemsadmin reload` reloads both.
 
 ## For developers
 

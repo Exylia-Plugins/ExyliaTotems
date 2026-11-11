@@ -13,7 +13,7 @@ public record TotemMessages(
         String prefix,
         @Comment("Sent to a player whose totem was honoured despite their ping")
         String saved,
-        @Comment("Sent to a sender without exyliatotems.admin who runs /exyliatotem-reload")
+        @Comment("Sent to a sender without exyliatotems.admin who runs /totemsadmin reload")
         String noPermission) {
 
     public TotemMessages() {

@@ -50,11 +50,11 @@ public final class ExyliaTotems {
         PacketEvents.getAPI().init();
         new BukkitPlayerListener(this);
 
-        PluginCommand command = plugin.getCommand("exyliatotem-reload");
+        PluginCommand command = plugin.getCommand("totemsadmin");
         if (command != null) {
             command.setExecutor(new ReloadCommand(this));
         } else {
-            debug.warn("Command exyliatotem-reload is missing from plugin.yml and was not registered");
+            debug.warn("Command totemsadmin is missing from plugin.yml and was not registered");
         }
 
         reloads = Reloads.of(plugin).step("configs", () -> Configs.reloadAll(plugin))

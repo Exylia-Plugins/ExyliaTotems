@@ -20,13 +20,14 @@ softdepend:
 depend:
   - packetevents
 commands:
-  exyliatotem-reload:
-    description: Reload plugin configuration
-    usage: /exyliatotem-reload
+  totemsadmin:
+    description: Reload plugin configuration (/totemsadmin reload)
+    usage: /totemsadmin reload
+    aliases: [exyliatotem-reload]
 
 permissions:
   exyliatotems.admin:
-    description: "Reload ExyliaTotems with /exyliatotem-reload."
+    description: "Reload ExyliaTotems with /totemsadmin reload."
     default: op
 
 libraries:
